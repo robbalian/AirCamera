@@ -9,66 +9,56 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View,
-  TabBarIOS
+  View
 } from 'react-native';
 
-import Tab from './components/tab'
+import VideoRecorder from './components/VideoRecorder'
+import VideoPlayback from './components/VideoPlayback'
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
 
 type Props = {};
+
+const MODES = {
+  RECORD: 0,
+  PLAYBACK: 1
+}
+
 export default class App extends Component<Props> {
   constructor() {
     super()
     this.state = {
-      selectedIndex: 1
+      mode : MODES.RECORD,
+      lastVideoURI: null,
     }
-
-    this.data = [
-      {
-        text: "Tab WHAAAA!",
-        systemIcon: 'downloads',
-        tabName: 'Downloads'
-      },
-      {
-        text: "Tab Two!",
-        systemIcon: 'bookmarks',
-        tabName: 'Bookmarks'
-      },
-    ]
   }
 
-  handleTabPress = (index) => {
-    console.log("tab pressed")
-    this.setState({selectedIndex: index})
+  renderComponent = () => {
+    switch(this.state.mode) {
+      case MODES.RECORD:
+        return (
+          <VideoRecorder 
+            videoURIChanged = {(videoURI) => {
+              this.setState({
+                lastVideoURI: videoURI,
+                mode : MODES.PLAYBACK
+              })
+            }}
+          />
+        )
+      case MODES.PLAYBACK:
+        return (
+          <VideoPlayback 
+            videoURI = {this.state.lastVideoURI}
+            onFinishedViewing = {() => this.setState({mode: MODES.RECORD})}
+          />
+        )
+    }
   }
 
   render() {
-    let tabs = this.data.map((item, index) => {
-      console.log(index)
-      console.log(this.state.selectedIndex)
-      return (<TabBarIOS.Item 
-        systemIcon={item.systemIcon}
-        key={item.tabName}
-        selected={this.state.selectedIndex === index}
-        onPress={this.handleTabPress.bind(this, index)}
-        >
-        <Tab item={item}/>
-      </TabBarIOS.Item>)
-      }
-    )
-    
     return (
       <View style={styles.container}>
-        <TabBarIOS tintColor='black'>
-          {tabs}
-        </TabBarIOS>
+        {this.renderComponent()}
       </View>
     );
   }
@@ -77,17 +67,6 @@ export default class App extends Component<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  }
 });

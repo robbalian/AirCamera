@@ -1,16 +1,14 @@
 import React from 'react'
 import { View, StyleSheet, Button} from 'react-native'
 import { RNCamera } from 'react-native-camera'
-import Video from 'react-native-video'
 
 export default class VideoRecorder extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isRecording: false,
-      lastVideoURI: null,
+      isRecording: false
     }
-
+    this.videoURIChanged = props.videoURIChanged
   }
 
   recordVideo = async function() {
@@ -20,7 +18,8 @@ export default class VideoRecorder extends React.Component {
       this.camera.recordAsync(options).then((videoObject) => {
         console.log("stopped recording")
         console.log(videoObject.uri)
-        this.setState({ lastVideoURI: videoObject.uri })
+        this.setState({isRecording : false})
+        this.videoURIChanged(videoObject.uri)
       }).catch((error) => console.log(error))
     }
   };
@@ -28,7 +27,6 @@ export default class VideoRecorder extends React.Component {
   handleRecordButtonPressed = () => {
     if (this.state.isRecording) {
       this.camera.stopRecording()
-      this.setState({isRecording : false})
     } else {
       this.recordVideo()
     }
@@ -36,34 +34,22 @@ export default class VideoRecorder extends React.Component {
 
   render() {
     let recordButtonTitle = this.state.isRecording ? 'Stop' : 'Record Video'
-    
 
     return (
       <View style={styles.container}>
-        <Button onPress={this.handleRecordButtonPressed} title={recordButtonTitle} />
-
-        {this.state.lastVideoURI == null ? 
         <RNCamera 
           ref={ref => {
             this.camera = ref;
           }}
           style = {styles.preview}
           type={RNCamera.Constants.Type.back}
-          autoFocus={true}
+          autoFocus={RNCamera.Constants.AutoFocus.on}
           captureAudio={true}
           onCameraReady={() => {}}
           flashMode={RNCamera.Constants.FlashMode.off}
-        />
-        :
-        <Video
-         repeat={true}
-         style={styles.player}
-         source={{uri: this.state.lastVideoURI}}
-         ref={(ref) => {
-           this.player = ref
-         }}
-        />
-        }
+        >
+          <Button onPress={this.handleRecordButtonPressed} title={recordButtonTitle} />
+        </RNCamera>
       </View>
     )
   }
@@ -76,9 +62,7 @@ const styles = StyleSheet.create({
   preview : {
     flex: 1,
     justifyContent: 'flex-end',
-    alignItems: 'center'
-  },
-  player: {
-    flex: 1
+    alignItems: 'center',
+    paddingBottom: 30
   }
 });
