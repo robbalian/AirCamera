@@ -17,6 +17,7 @@ Quickly create a React Native app which does the following
 
 ## Video of the App ##
 It's probably not worth the time to run on your device...
+[Video](https://streamable.com/e84aw)
 
 
 ## How to Run ##
